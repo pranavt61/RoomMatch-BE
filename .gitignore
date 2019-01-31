@@ -1,0 +1,4 @@
+## Git Ignore for RoomMatch-BE ##
+
+# node modules
+node_modules/
