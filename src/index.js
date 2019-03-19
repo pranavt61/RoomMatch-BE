@@ -12,6 +12,8 @@
  */
 const express = require('express');
 const morgan = require('morgan');
+const bodyParser = require('body-parser');
+
 const routes = require('./routes/');
 
 const PORT = 3000;
@@ -23,6 +25,8 @@ const start = () => {
    * middleware
    */
   app.use(morgan(':method :url\t:status :response-time ms - :res[content-length]'));
+  app.use(bodyParser.json());
+  app.use(bodyParser.urlencoded({extended: true}));
 
   /**
    * Routes
