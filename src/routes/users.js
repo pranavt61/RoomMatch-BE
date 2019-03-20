@@ -7,6 +7,7 @@
 
 // TEST
 // Test object to take over database
+let LAST_USER_ID = 0;
 let USERS_DATA = {};
 
 const router = require('express').Router();
@@ -57,7 +58,9 @@ router.post('/create', function(req, res){
   }
 
   // Create user
+  let userId = LAST_USER_ID ++;
   USERS_DATA[email] = {
+    user_id: userId,
     email: email,
     time_created: req.start
   };
@@ -65,6 +68,37 @@ router.post('/create', function(req, res){
   // Success
   resObj.success = true;
   resObj.data = USERS_DATA;
+  resObj.error = null;
+
+  res.status(200).json(resObj);
+});
+
+/*
+ * Authenticate a User
+ * Method: GET
+ * Authenticate with email
+ *
+ * TODO: Upgrade to JWT/Firebase
+  */
+router.get('/auth', function(req, res) {
+  let resObj = resForm(null, null, null);
+
+  // extract query
+  let email = req.query.email;
+
+  // Get user
+  let user = USERS_DATA[email];
+  if (typeof user === 'undefined') {
+    resObj.success = false;
+    resObj.data = null;
+    resObj.error = "Invalid Login";
+
+    res.status(400).json(resObj);
+    return;
+  }
+
+  resObj.success = true;
+  resObj.data = user;
   resObj.error = null;
 
   res.status(200).json(resObj);
