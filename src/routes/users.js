@@ -7,7 +7,7 @@
 
 // TEST
 // Test object to take over database
-let USERS_DATA = [];
+let USERS_DATA = {};
 
 const router = require('express').Router();
 const resForm = require('./responseFormatter');
@@ -28,10 +28,12 @@ router.post('/create', function(req, res){
 
   // Check for email body param
   let email = req.body.email;
-  if (typeof email !== 'string') {
+  if (typeof email !== 'string'
+    || email.length === 0) {
     resObj.success = false;
     resObj.error = 'Email missing';
-    res.status(400).json(resObj)
+    res.status(400).json(resObj);
+    return;
   } 
 
   // Check for correct format
@@ -50,12 +52,19 @@ router.post('/create', function(req, res){
   if (email in USERS_DATA) {
     resObj.success = false;
     resObj.error = 'Email taken';
-    res.status(400).json(resObj)
+    res.status(400).json(resObj);
+    return;
   }
+
+  // Create user
+  USERS_DATA[email] = {
+    email: email,
+    time_created: req.start
+  };
 
   // Success
   resObj.success = true;
-  resObj.data = 'User Created';
+  resObj.data = USERS_DATA;
   resObj.error = null;
 
   res.status(200).json(resObj);
