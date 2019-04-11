@@ -11,7 +11,9 @@ let LAST_USER_ID = 0;
 let USERS_DATA = {};
 
 const router = require('express').Router();
-const resForm = require('./responseFormatter');
+
+const resForm = require('../util/responseFormatter');
+const userService = require('../service/users');
 
 router.get('/', function(req, res){
   res.send('User Route');
@@ -25,10 +27,10 @@ router.get('/', function(req, res){
  * NOTE: EXCLUDE PASSWORDS
   */
 router.post('/create', function(req, res){
-  let resObj = resForm(null, null, null);
+  let resObj = resForm();
 
   // Check for email body param
-  let email = req.body.email;
+  const email = req.body.email;
   if (typeof email !== 'string'
     || email.length === 0) {
     resObj.success = false;
@@ -36,8 +38,6 @@ router.post('/create', function(req, res){
     res.status(400).json(resObj);
     return;
   } 
-
-  // Check for correct format
   /*
   emailRegEx = new RegExp('+@u.pacific.edu'); 
   email = emailRegEx.exec(email);
@@ -49,28 +49,35 @@ router.post('/create', function(req, res){
   email = email[0];
   */
 
-  // Check for unique
-  if (email in USERS_DATA) {
+  // Create user
+  userService.createUser(email).then((mongRes) => {
+    const err = mongRes.error;
+    if (err) {
+      // Fail
+      resObj.success = false;
+      resObj.data = null;
+      resObj.error = err;
+      res.status(400).json(resObj);
+      return;
+    } else {
+      // Success
+      resObj.success = true;
+      resObj.data = null;
+      resObj.error = null;
+      res.status(200).json(resObj);
+      return;
+    }
+  }).catch((err) => {
+    console.log("CREATE USER ERROR");
+    console.log(err);
+
+    // Fail
     resObj.success = false;
-    resObj.error = 'Email taken';
+    resObj.data = null;
+    resObj.error = "Cannot create user";
     res.status(400).json(resObj);
     return;
-  }
-
-  // Create user
-  let userId = LAST_USER_ID ++;
-  USERS_DATA[email] = {
-    user_id: userId,
-    email: email,
-    time_created: req.start
-  };
-
-  // Success
-  resObj.success = true;
-  resObj.data = USERS_DATA;
-  resObj.error = null;
-
-  res.status(200).json(resObj);
+  });
 });
 
 /*
@@ -81,27 +88,75 @@ router.post('/create', function(req, res){
  * TODO: Upgrade to JWT/Firebase
   */
 router.get('/auth', function(req, res) {
-  let resObj = resForm(null, null, null);
+  let resObj = resForm();
 
   // extract query
   let email = req.query.email;
 
   // Get user
-  let user = USERS_DATA[email];
-  if (typeof user === 'undefined') {
+  userService.getUser(email).then((mongRes) => {
+    const err = mongRes.error;
+    if (err) {
+      // Fail
+      resObj.success = false;
+      resObj.data = null;
+      resObj.error = err;
+      res.status(400).json(resObj);
+      return;
+    } else {
+      // Success
+      resObj.success = true;
+      resObj.data = mongRes.data;
+      resObj.error = null;
+      res.status(200).json(resObj);
+      return;
+    }
+  }).catch((err) => {
+    console.log("AUTH ERROR");
+    console.log(err);
+
+    // Fail
     resObj.success = false;
     resObj.data = null;
-    resObj.error = "Invalid Login";
-
+    resObj.error = "Cannot auth user";
     res.status(400).json(resObj);
     return;
-  }
+  });
+});
 
-  resObj.success = true;
-  resObj.data = user;
-  resObj.error = null;
+router.get('/delete', function(req,res) {
+  let resObj = resForm();
 
-  res.status(200).json(resObj);
+  let id = req.query.id;
+
+  userService.deleteUser(id).then((mongRes) => {
+    const err = mongRes.error;
+    if (err) {
+      // Fail
+      resObj.success = false;
+      resObj.data = null;
+      resObj.error = err;
+      res.status(400).json(resObj);
+      return;
+    } else {
+      // Success
+      resObj.success = true;
+      resObj.data = null;
+      resObj.error = null;
+      res.status(200).json(resObj);
+      return;
+    }
+  }).catch((err) => {
+    console.log("DELETE USER ERROR");
+    console.log(err);
+
+    // Fail
+    resObj.success = false;
+    resObj.data = null;
+    resObj.error = "Cannot delete user";
+    res.status(400).json(resObj);
+    return;
+  });
 });
 
 module.exports = {

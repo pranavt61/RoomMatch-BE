@@ -8,9 +8,9 @@
 const resFormatter = function(success, data, error) {
 
   return {
-    success: success,
-    data: data,
-    error: error
+    success: success || null,
+    data: data || null,
+    error: error || null
   };
 };
 
