@@ -13,7 +13,7 @@ let USERS_DATA = {};
 const router = require('express').Router();
 
 const resForm = require('../util/responseFormatter');
-const userService = require('../service/users');
+const usersService = require('../service/users');
 
 router.get('/', function(req, res){
   res.send('User Route');
@@ -35,30 +35,24 @@ router.post('/create', function(req, res){
     || email.length === 0) {
     resObj.success = false;
     resObj.error = 'Email missing';
-    res.status(400).json(resObj);
+    res.status(200).json(resObj);
     return;
   } 
-  /*
-  emailRegEx = new RegExp('+@u.pacific.edu'); 
-  email = emailRegEx.exec(email);
-  if (email == null) {
-    resObj.success = false;
-    resObj.error = 'Invalid email';
-    res.status(400).json(resObj);
-  }
-  email = email[0];
-  */
 
-  // Create user
-  userService.createUser(email).then((mongRes) => {
+
+  usersService.getUser(email).then((mongRes) => {
+    const err = mongRes.error;
+
+    if (err == null) {
+      // User already exists
+      throw 'Email taken';
+    }
+
+    return usersService.createUser(email);
+  }).then((mongRes) => {
     const err = mongRes.error;
     if (err) {
-      // Fail
-      resObj.success = false;
-      resObj.data = null;
-      resObj.error = err;
-      res.status(400).json(resObj);
-      return;
+      throw 'Cannot create user';
     } else {
       // Success
       resObj.success = true;
@@ -68,14 +62,11 @@ router.post('/create', function(req, res){
       return;
     }
   }).catch((err) => {
-    console.log("CREATE USER ERROR");
-    console.log(err);
-
     // Fail
     resObj.success = false;
     resObj.data = null;
-    resObj.error = "Cannot create user";
-    res.status(400).json(resObj);
+    resObj.error = err;
+    res.status(200).json(resObj);
     return;
   });
 });
@@ -94,7 +85,7 @@ router.get('/auth', function(req, res) {
   let email = req.query.email;
 
   // Get user
-  userService.getUser(email).then((mongRes) => {
+  usersService.getUser(email).then((mongRes) => {
     const err = mongRes.error;
     if (err) {
       // Fail
@@ -129,7 +120,7 @@ router.get('/delete', function(req,res) {
 
   let id = req.query.id;
 
-  userService.deleteUser(id).then((mongRes) => {
+  usersService.deleteUser(id).then((mongRes) => {
     const err = mongRes.error;
     if (err) {
       // Fail
