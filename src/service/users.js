@@ -16,7 +16,7 @@ const MongoObjectID = require('mongodb').ObjectID;
 const resForm = require('../util/responseFormatter');
 
 // Link to Mongo Service
-const MongoSrc = 'mongodb://localhost:27017/';
+const MongoSrc = require('./MongoSrc.js');
 
 // Create a User
 async function createUser(email) {

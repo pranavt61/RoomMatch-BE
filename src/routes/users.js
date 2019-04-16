@@ -30,7 +30,7 @@ router.post('/create', function(req, res){
   let resObj = resForm();
 
   // Check for email body param
-  const email = req.body.email;
+  let email = req.body.email;
   if (typeof email !== 'string'
     || email.length === 0) {
     resObj.success = false;
@@ -39,6 +39,19 @@ router.post('/create', function(req, res){
     return;
   } 
 
+  // check for u.pacific.edu email
+  let reg = new RegExp('.+@u\.pacific\.edu');
+  let match = reg.exec(email);
+
+  if (match === null) {
+    // not vaild email
+    resObj.success = false;
+    resObj.data = null;
+    resObj.error = 'Invalid Email';
+    res.status(200).json(resObj);
+    return;
+  }
+  email = match[0];
 
   usersService.getUser(email).then((mongRes) => {
     const err = mongRes.error;
