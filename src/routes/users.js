@@ -1,14 +1,8 @@
-'use strict';
 /**
  *  RoomMatch
  *  @description: Users route handlers
  *  @license: MIT
  */
-
-// TEST
-// Test object to take over database
-let LAST_USER_ID = 0;
-let USERS_DATA = {};
 
 const router = require('express').Router();
 
@@ -16,7 +10,7 @@ const resForm = require('../util/responseFormatter');
 const usersService = require('../service/users');
 
 router.get('/', function(req, res){
-  res.send('User Route');
+  return res.send('User Route');
 });
 
 /*
@@ -35,8 +29,7 @@ router.post('/create', function(req, res){
     || email.length === 0) {
     resObj.success = false;
     resObj.error = 'Email missing';
-    res.status(200).json(resObj);
-    return;
+    return res.status(200).json(resObj);
   } 
 
   // check for u.pacific.edu email
@@ -48,8 +41,7 @@ router.post('/create', function(req, res){
     resObj.success = false;
     resObj.data = null;
     resObj.error = 'Invalid Email';
-    res.status(200).json(resObj);
-    return;
+    return res.status(200).json(resObj);
   }
   email = match[0];
 
@@ -71,16 +63,14 @@ router.post('/create', function(req, res){
       resObj.success = true;
       resObj.data = null;
       resObj.error = null;
-      res.status(200).json(resObj);
-      return;
+      return res.status(200).json(resObj);
     }
   }).catch((err) => {
     // Fail
     resObj.success = false;
     resObj.data = null;
     resObj.error = err;
-    res.status(200).json(resObj);
-    return;
+    return res.status(200).json(resObj);
   });
 });
 
@@ -105,15 +95,13 @@ router.get('/auth', function(req, res) {
       resObj.success = false;
       resObj.data = null;
       resObj.error = err;
-      res.status(400).json(resObj);
-      return;
+      return res.status(400).json(resObj);
     } else {
       // Success
       resObj.success = true;
       resObj.data = mongRes.data;
       resObj.error = null;
-      res.status(200).json(resObj);
-      return;
+      return res.status(200).json(resObj);
     }
   }).catch((err) => {
     console.log("AUTH ERROR");
@@ -123,8 +111,7 @@ router.get('/auth', function(req, res) {
     resObj.success = false;
     resObj.data = null;
     resObj.error = "Cannot auth user";
-    res.status(400).json(resObj);
-    return;
+    return res.status(400).json(resObj);
   });
 });
 
@@ -140,15 +127,13 @@ router.get('/delete', function(req,res) {
       resObj.success = false;
       resObj.data = null;
       resObj.error = err;
-      res.status(400).json(resObj);
-      return;
+      return res.status(400).json(resObj);
     } else {
       // Success
       resObj.success = true;
       resObj.data = null;
       resObj.error = null;
-      res.status(200).json(resObj);
-      return;
+      return res.status(200).json(resObj);
     }
   }).catch((err) => {
     console.log("DELETE USER ERROR");
@@ -158,8 +143,7 @@ router.get('/delete', function(req,res) {
     resObj.success = false;
     resObj.data = null;
     resObj.error = "Cannot delete user";
-    res.status(400).json(resObj);
-    return;
+    return res.status(400).json(resObj);
   });
 });
 

@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-
 /**
  *  @(Project): RoomMatch Backend
  *  @(Filename): users.js
@@ -10,7 +9,6 @@
 /**
  *  App Dependencies
  */
-// const DBClient = require('./index');
 const MongoClient = require('mongodb').MongoClient;
 const MongoObjectID = require('mongodb').ObjectID;
 const resForm = require('../util/responseFormatter');
