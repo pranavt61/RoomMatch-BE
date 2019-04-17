@@ -31,7 +31,7 @@ const start = () => {
   /**
    * Routes
    */
-  app.use('/app/v1/', routes);
+  app.use('/v1/', routes);
 
   /**
    * Error Handlers
