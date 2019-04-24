@@ -11,6 +11,7 @@
  */
 const MongoClient = require('mongodb').MongoClient;
 const MongoObjectID = require('mongodb').ObjectID;
+
 const resForm = require('../util/responseFormatter');
 
 // Link to Mongo Service
@@ -107,6 +108,8 @@ async function updateProfile(profile) {
 async function getProfileByUser(user_id) {
   let resObj = resForm();
 
+  // save image to cloudinary
+
   // query command
   let query = {
     user_id: new MongoObjectID(user_id)
@@ -146,7 +149,8 @@ async function getProfileByUser(user_id) {
 
 // upload profile image to DB
 async function createProfileImage(image) {
-  
+  let resObj = resForm();
+
 }
 
 module.exports = {

@@ -5,14 +5,52 @@
  * */
 
 const router = require('express').Router();
+const multer = require("multer");
+const cloudinary = require("cloudinary");
+const cloudinaryStorage = require("multer-storage-cloudinary");
 
 const resForm = require('../util/responseFormatter');
 const profilesService = require('../service/profiles');
+
+// config Cloudinary
+cloudinary.config({
+  cloud_name: "roommatch",
+  api_key: "278272945684388",
+  api_secret: "o8vNTx6DE9D3qHoowQuFe5qHAR4"
+});
+const storage = cloudinaryStorage({
+  cloudinary: cloudinary,
+  folder: "demo",
+  allowedFormats: ["jpg", "png"],
+  transformation: [{ width: 500, height: 500, crop: "limit" }]
+});
+const parser = multer({ storage: storage });
 
 // test route
 router.get('/', (req, res) => {
   res.send('Profiles Route');
   return;
+});
+
+// upload image to cloudinary
+router.post('/images', parser.single("image"), (req, res) => {
+  let resObj = resForm();
+
+  let file = req.file;
+
+  if (file) {
+    // Success
+    resObj.success = true;
+    resObj.data = file;
+    resObj.error = null;
+    return res.status(200).json(resObj);
+  } else {
+    // fail
+    resObj.success = false;
+    resObj.data = null;
+    resObj.error = "Cannot upload image";
+    return res.status(200).json(resObj);
+  }
 });
 
 /*

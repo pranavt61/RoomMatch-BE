@@ -24,8 +24,9 @@ const start = () => {
   /*
    * middleware
    */
-  app.use(morgan(':method :url\t:status :response-time ms - :res[content-length]'));
-  app.use(bodyParser.json());
+  const morgan_format = ':method :url\t:status :response-time ms - :res[content-length]';
+  app.use(morgan(morgan_format));
+  app.use(bodyParser.json());                                           // x-www-form-urlencoded
   app.use(bodyParser.urlencoded({extended: true}));
 
   /**
