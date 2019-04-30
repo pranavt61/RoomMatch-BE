@@ -145,6 +145,32 @@ router.get('/getByUserId', (req, res) => {
   });
 });
 
+router.get('/next', (req, res) => {
+  let resObj = resForm();
+
+  let user_id = req.query.user_id;
+
+  profilesService.getProfileNext(user_id).then((mongRes) => {
+    const err = mongRes.error;
+
+    if (err) {
+      throw 'Cannot retrieve Profile';
+    } else {
+      // Success
+      resObj.success = true;
+      resObj.data = mongRes.data;
+      resObj.error = null;
+      return res.status(200).json(resObj);
+    }
+  }).catch((err) => {
+    // Fail
+    resObj.success = false;
+    resObj.data = null;
+    resObj.error = err;
+    return res.status(200).json(resObj);
+  });
+});
+
 module.exports = {
   router: router
 };

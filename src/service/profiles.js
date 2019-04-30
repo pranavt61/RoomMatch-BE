@@ -147,14 +147,76 @@ async function getProfileByUser(user_id) {
   }
 }
 
-// upload profile image to DB
-async function createProfileImage(image) {
+// Get a profile that the user has not swiped on yet
+async function getProfileNext(user_id) {
   let resObj = resForm();
+
+  // query command
+  let swipe_query = {
+    from_user_id: new MongoObjectID(user_id)
+  };
+
+  // defined after swipe query
+  let profile_query = {};
+  
+  try {
+    const client = await MongoClient.connect(MongoSrc);
+    const db = client.db('RoomMatch');
+
+    // get array of user_ids that requesting user has already swiped on
+    let swipe_res = await db.collection('swipes').find(swipe_query)
+                              .map((s) => s.to_user_id).toArray();
+
+    // add this user_id to filter
+    swipe_res.push(new MongoObjectID(user_id));
+    console.log(swipe_res);
+
+    profile_query = {
+      user_id: {
+        // not in
+        $nin: swipe_res
+      }
+    };
+    
+    const profile_res = await db.collection('profiles').find(profile_query).toArray();
+
+    let res = [];
+    if (profile_res.length > 0) {
+      res = profile_res[0];
+    }
+
+    await client.close();
+
+    if (res) {
+      console.log('Success: retrieved profile from database')
+
+      // profile found
+      resObj.success = true;
+      resObj.data = res;
+      resObj.error = null;
+      return resObj;
+    } else {
+      // profile not found
+      resObj.success = false;
+      resObj.data = null;
+      resObj.error = "No profile found";
+      return resObj;
+    }
+  } catch(err) {
+    // Fail
+    console.log("ERROR: Cannot retrieve Profile");
+    console.log(err);
+    resObj.success = false;
+    resObj.data = null;
+    resObj.error = err;
+    return resObj;
+  }
 
 }
 
 module.exports = {
   createProfile: createProfile,
   updateProfile: updateProfile,
-  getProfileByUser: getProfileByUser
+  getProfileByUser: getProfileByUser,
+  getProfileNext: getProfileNext
 };
