@@ -148,7 +148,7 @@ async function getProfileByUser(user_id) {
 }
 
 // Get a profile that the user has not swiped on yet
-async function getProfileNext(user_id) {
+async function getProfileNext(user_id, viewing_user_id) {
   let resObj = resForm();
 
   // query command
@@ -169,7 +169,11 @@ async function getProfileNext(user_id) {
 
     // add this user_id to filter
     swipe_res.push(new MongoObjectID(user_id));
-    console.log(swipe_res);
+
+    // add current profile user_id to filter
+    if (viewing_user_id.length > 0){
+     swipe_res.push(new MongoObjectID(viewing_user_id));
+    }
 
     profile_query = {
       user_id: {

@@ -149,8 +149,9 @@ router.get('/next', (req, res) => {
   let resObj = resForm();
 
   let user_id = req.query.user_id;
+  let viewing_user_id = req.query.viewing_user_id || "";   // used to filter our current profile viewed
 
-  profilesService.getProfileNext(user_id).then((mongRes) => {
+  profilesService.getProfileNext(user_id, viewing_user_id).then((mongRes) => {
     const err = mongRes.error;
 
     if (err) {
