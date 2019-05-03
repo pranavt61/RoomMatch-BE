@@ -145,6 +145,34 @@ router.get('/getByUserId', (req, res) => {
   });
 });
 
+router.get('/getMany', (req, res) => {
+  let resObj = resForm();
+
+  let user_ids = req.query.user_ids.split(',');
+
+  console.log(user_ids);
+
+  profilesService.getManyProfiles(user_ids).then((mongRes) => {
+    const err = mongRes.error;
+
+    if (err) {
+      throw 'Cannot retrieve many Profile';
+    } else {
+      // Success
+      resObj.success = true;
+      resObj.data = mongRes.data;
+      resObj.error = null;
+      return res.status(200).json(resObj);
+    }
+  }).catch((err) => {
+    // Fail
+    resObj.success = false;
+    resObj.data = null;
+    resObj.error = err;
+    return res.status(200).json(resObj);
+  });
+});
+
 router.get('/next', (req, res) => {
   let resObj = resForm();
 

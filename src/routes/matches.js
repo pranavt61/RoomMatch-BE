@@ -43,6 +43,32 @@ router.post('/create', function(req, res) {
   });
 });
 
+router.get('/get', function(req, res) {
+  let resObj = resForm();
+
+  let user_id = req.query.user_id;
+  
+  matchesService.getMatches(user_id).then((mongRes) => {
+    const err = mongRes.error;
+
+    if (err) {
+      throw 'Cannot get matches';
+    } else {
+      // success
+      resObj.success = true;
+      resObj.data = mongRes.data;
+      resObj.error = null;
+      return res.status(200).json(resObj);
+    }
+  }).catch((err) => {
+    // fail
+    resObj.success = false;
+    resObj.data = null;
+    resObj.error = err;
+    return res.status(200).json(resObj);
+  });
+});
+
 module.exports = {
   router: router
 };

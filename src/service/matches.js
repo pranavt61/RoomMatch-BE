@@ -81,6 +81,40 @@ async function createSwipe(swipe) {
   }
 }
 
+async function getMatches(user_id) {
+  let resObj = resForm();
+
+  // query command
+  let find_query = {
+    user_ids: new MongoObjectID(user_id)
+  };
+
+  try {
+    const client = await MongoClient.connect(MongoSrc);
+    const db = client.db('RoomMatch');
+
+    // find existing swipe
+    let res = await db.collection('matches').find(find_query).toArray();
+    await client.close();
+
+    // Success
+    console.log('Success: retrieved matches from database')
+    resObj.success = true;
+    resObj.data = res;
+    resObj.error = null;
+    return resObj;
+  } catch(err) {
+    // Fail
+    console.log("ERROR: Cannot retrive matches");
+    console.log(err);
+    resObj.success = false;
+    resObj.data = null;
+    resObj.error = err;
+    return resObj;
+  }
+}
+
 module.exports = {
-  createSwipe: createSwipe
+  createSwipe: createSwipe,
+  getMatches: getMatches
 };

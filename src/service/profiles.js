@@ -147,6 +147,53 @@ async function getProfileByUser(user_id) {
   }
 }
 
+// Get many profiles by user_ids
+async function getManyProfiles(user_ids) {
+  let resObj = resForm();
+
+  let ids = []
+  for (let i = 0; i < user_ids.length; i ++) {
+    ids.push(new MongoObjectID(user_ids[i]));
+  }
+
+  console.log(ids);
+
+  // query command
+  let query = {
+    user_id: { $in: ids }
+  };
+
+  try {
+    const client = await MongoClient.connect(MongoSrc);
+    const db = client.db('RoomMatch');
+    const res = await db.collection('profiles').find(query).toArray();
+    await client.close();
+
+    if (res) {
+      console.log('Success: retrieved many profiles from database')
+
+      // profile found
+      resObj.success = true;
+      resObj.data = res;
+      resObj.error = null;
+      return resObj;
+    } else {
+      // profile not found
+      resObj.success = false;
+      resObj.data = null;
+      resObj.error = "No profile found";
+      return resObj;
+    }
+  } catch(err) {
+    // Fail
+    console.log("ERROR: Cannot retrieve Profile");
+    console.log(err);
+    resObj.success = false;
+    resObj.data = null;
+    resObj.error = err;
+    return resObj;
+  }
+}
 // Get a profile that the user has not swiped on yet
 async function getProfileNext(user_id, n) {
   let resObj = resForm();
@@ -212,5 +259,6 @@ module.exports = {
   createProfile: createProfile,
   updateProfile: updateProfile,
   getProfileByUser: getProfileByUser,
-  getProfileNext: getProfileNext
+  getProfileNext: getProfileNext,
+  getManyProfiles: getManyProfiles
 };
