@@ -10,11 +10,14 @@
 /**
  *  App Dependencies
  */
+const http = require('http');
 const express = require('express');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
+const socketio = require('socket.io');
 
 const routes = require('./routes/');
+const socket = require('./service/socket');
 
 const PORT = 3000;
 
@@ -48,7 +51,16 @@ const start = () => {
     res.json({error: "error"});
   });
 
-  app.listen(PORT, () => {console.log("Serving on port " + PORT + "...")});
+  let server = http.Server(app);
+
+  server.listen(PORT, () => {console.log("Serving on port " + PORT + "...")});
+
+  /*
+   * WebSockets
+   *  using Socket.IO
+   */
+  let io = socketio(server);
+  socket.init(io);
 };
 
 module.exports = {

@@ -148,7 +148,7 @@ async function getProfileByUser(user_id) {
 }
 
 // Get a profile that the user has not swiped on yet
-async function getProfileNext(user_id, viewing_user_id) {
+async function getProfileNext(user_id, n) {
   let resObj = resForm();
 
   // query command
@@ -170,11 +170,6 @@ async function getProfileNext(user_id, viewing_user_id) {
     // add this user_id to filter
     swipe_res.push(new MongoObjectID(user_id));
 
-    // add current profile user_id to filter
-    if (viewing_user_id.length > 0){
-     swipe_res.push(new MongoObjectID(viewing_user_id));
-    }
-
     profile_query = {
       user_id: {
         // not in
@@ -182,12 +177,7 @@ async function getProfileNext(user_id, viewing_user_id) {
       }
     };
     
-    const profile_res = await db.collection('profiles').find(profile_query).toArray();
-
-    let res = [];
-    if (profile_res.length > 0) {
-      res = profile_res[0];
-    }
+    const res = await db.collection('profiles').find(profile_query).limit(Number(n)).toArray();
 
     await client.close();
 

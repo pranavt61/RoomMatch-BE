@@ -95,7 +95,7 @@ router.get('/auth', function(req, res) {
       resObj.success = false;
       resObj.data = null;
       resObj.error = err;
-      return res.status(400).json(resObj);
+      return res.status(200).json(resObj);
     } else {
       // Success
       resObj.success = true;
@@ -111,7 +111,7 @@ router.get('/auth', function(req, res) {
     resObj.success = false;
     resObj.data = null;
     resObj.error = "Cannot auth user";
-    return res.status(400).json(resObj);
+    return res.status(200).json(resObj);
   });
 });
 
@@ -127,7 +127,7 @@ router.get('/delete', function(req,res) {
       resObj.success = false;
       resObj.data = null;
       resObj.error = err;
-      return res.status(400).json(resObj);
+      return res.status(200).json(resObj);
     } else {
       // Success
       resObj.success = true;
@@ -143,7 +143,7 @@ router.get('/delete', function(req,res) {
     resObj.success = false;
     resObj.data = null;
     resObj.error = "Cannot delete user";
-    return res.status(400).json(resObj);
+    return res.status(200).json(resObj);
   });
 });
 

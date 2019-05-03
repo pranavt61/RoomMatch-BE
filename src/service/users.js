@@ -59,7 +59,20 @@ async function getUser(email) {
 
     const db = client.db('RoomMatch');
 
-    const res = await db.collection('users').findOne({email: email});
+    let res = await db.collection('users').findOne({email: email});
+
+    // Does user have a profile?
+    res.has_profile = false;
+
+    let profile_res = null;
+    if (res){
+      profile_res = await db.collection('profiles').findOne({user_id: res._id});
+      
+      if (profile_res) {
+        res.has_profile = true;
+      }
+    }
+
     await client.close();
 
     if (res) {

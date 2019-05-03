@@ -13,13 +13,13 @@ const MongoClient = require('mongodb').MongoClient;
 const MongoObjectID = require('mongodb').ObjectID;
 const resForm = require('../util/responseFormatter');
 
+const socketServices = require('./socket');
+
 // Link to Mongo Service
 const MongoSrc = require('./MongoSrc.js');
 
 async function createSwipe(swipe) {
   let resObj = resForm();
-
-  console.log("MATCHES SERV");
 
   // query command
   //  Find a swipe that the other user inserted
@@ -32,8 +32,10 @@ async function createSwipe(swipe) {
 
   // if match already found
   let match_query = {
-    user_id_1: new MongoObjectID(swipe.to_user_id),
-    user_id_2: new MongoObjectID(swipe.from_user_id)
+    user_ids: [
+      new MongoObjectID(swipe.to_user_id),
+      new MongoObjectID(swipe.from_user_id)
+    ]
   };
 
   // create swipe
@@ -52,6 +54,9 @@ async function createSwipe(swipe) {
     if (res) {
       // existing match found
       res = await db.collection('matches').insertOne(match_query);
+
+      // emit socket event
+      socketServices.match_emit(swipe.from_user_id, swipe.to_user_id);
     }
 
     // store swipe
