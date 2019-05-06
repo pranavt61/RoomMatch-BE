@@ -31,7 +31,8 @@ async function createProfile(profile) {
     major: profile.major,
     location: profile.location,
     tags: profile.tags,
-    image: profile.image
+    image: profile.image,
+    bio: profile.bio
   };
 
   try {
@@ -155,9 +156,6 @@ async function getManyProfiles(user_ids) {
   for (let i = 0; i < user_ids.length; i ++) {
     ids.push(new MongoObjectID(user_ids[i]));
   }
-
-  console.log(ids);
-
   // query command
   let query = {
     user_id: { $in: ids }

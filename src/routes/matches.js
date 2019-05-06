@@ -69,6 +69,54 @@ router.get('/get', function(req, res) {
   });
 });
 
+router.get('/getChat', (req, res) => {
+  let resObj = resForm();
+
+  let match_id = req.query.match_id;
+  
+  matchesService.getChat(match_id).then((mongRes) => {
+    // success
+    resObj.success = true;
+    resObj.data = mongRes.data;
+    resObj.error = null;
+    return res.status(200).json(resObj);
+  }).catch((err) => {
+    // fail
+    resObj.success = false;
+    resObj.data = null;
+    resObj.error = err;
+    return res.status(200).json(resObj);
+  });
+});
+
+router.post('/addChat', (req, res) => {
+  let resObj = resForm();
+
+  const match_id = req.body.match_id;
+  const user_id = req.body.user_id;
+  const message = req.body.message;
+
+  matchesService.addChat(match_id, user_id, message).then((mongRes) => {
+    const err = mongRes.error;
+
+    if (err) {
+      throw 'Cannot add chat';
+    } else {
+      // success
+      resObj.success = true;
+      resObj.data = mongRes.data;
+      resObj.error = null;
+      return res.status(200).json(resObj);
+    }
+  }).catch((err) => {
+    // fail
+    resObj.success = false;
+    resObj.data = null;
+    resObj.error = err;
+    return res.status(200).json(resObj);
+  });
+});
+
 module.exports = {
   router: router
 };

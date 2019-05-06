@@ -150,8 +150,6 @@ router.get('/getMany', (req, res) => {
 
   let user_ids = req.query.user_ids.split(',');
 
-  console.log(user_ids);
-
   profilesService.getManyProfiles(user_ids).then((mongRes) => {
     const err = mongRes.error;
 

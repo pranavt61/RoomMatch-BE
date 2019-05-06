@@ -32,6 +32,7 @@ async function createSwipe(swipe) {
 
   // if match already found
   let match_query = {
+    chat: [],
     user_ids: [
       new MongoObjectID(swipe.to_user_id),
       new MongoObjectID(swipe.from_user_id)
@@ -114,7 +115,91 @@ async function getMatches(user_id) {
   }
 }
 
+async function getChat(match_id) {
+  let resObj = resForm();
+
+  // query command
+  let find_query = {
+    _id: new MongoObjectID(match_id)
+  };
+
+  try {
+    const client = await MongoClient.connect(MongoSrc);
+    const db = client.db('RoomMatch');
+
+    // find existing swipe
+    let res = await db.collection('matches').find(find_query).toArray();
+    await client.close();
+
+    // Success
+    console.log('Success: retrieved match from database')
+    resObj.success = true;
+    resObj.data = res;
+    resObj.error = null;
+    return resObj;
+  } catch(err) {
+    // Fail
+    console.log("ERROR: Cannot retrive matches");
+    console.log(err);
+    resObj.success = false;
+    resObj.data = null;
+    resObj.error = err;
+    return resObj;
+  }
+}
+
+async function addChat(match_id, user_id, message) {
+  let resObj = resForm();
+
+  // query command
+  let find_query = {
+    _id: new MongoObjectID(match_id)
+  };
+
+  let update_query = {
+    $push: {
+      chat: {
+        $each: [{
+          from: new MongoObjectID(user_id),
+          message: message,
+          timestamp: new Date().getTime()
+        }],
+        $sort: { timestamp: -1 }
+      }
+    }
+  }
+
+  try {
+    const client = await MongoClient.connect(MongoSrc);
+    const db = client.db('RoomMatch');
+
+    // find existing swipe
+    let res = await db.collection('matches').updateOne(find_query, update_query);
+  
+    socketServices.chat_emit(match_id, user_id, message);
+
+    await client.close();
+
+    // Success
+    console.log('Success: chat saved to database')
+    resObj.success = true;
+    resObj.data = res;
+    resObj.error = null;
+    return resObj;
+  } catch(err) {
+    // Fail
+    console.log("ERROR: Cannot save chat");
+    console.log(err);
+    resObj.success = false;
+    resObj.data = null;
+    resObj.error = err;
+    return resObj;
+  }
+}
+
 module.exports = {
   createSwipe: createSwipe,
-  getMatches: getMatches
+  getMatches: getMatches,
+  addChat: addChat,
+  getChat: getChat
 };

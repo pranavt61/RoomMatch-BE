@@ -25,6 +25,7 @@ router.post('/create', function(req, res){
 
   // Check for email body param
   let email = req.body.email;
+  let password = req.body.password;
   if (typeof email !== 'string'
     || email.length === 0) {
     resObj.success = false;

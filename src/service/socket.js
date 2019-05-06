@@ -104,6 +104,39 @@ async function getSocketID(user_id) {
   }
 }
 
+async function getMatch(match_id) {
+  let resObj = resForm();
+
+  // query command
+  let find_query = {
+    _id: new MongoObjectID(match_id)
+  };
+
+  try {
+    const client = await MongoClient.connect(MongoSrc);
+    const db = client.db('RoomMatch');
+
+    // find existing swipe
+    let res = await db.collection('matches').find(find_query).toArray();
+    await client.close();
+
+    // Success
+    console.log('Success: retrieved matches from database')
+    resObj.success = true;
+    resObj.data = res[0];
+    resObj.error = null;
+    return resObj;
+  } catch(err) {
+    // Fail
+    console.log("ERROR: Cannot retrive matches");
+    console.log(err);
+    resObj.success = false;
+    resObj.data = null;
+    resObj.error = err;
+    return resObj;
+  }
+}
+
 let global_io = null;
 
 // Sockets Events
@@ -132,8 +165,6 @@ const match_emit = (from_user_id, to_user_id) => {
   let to_socket = null;
 
   getSocketID(from_user_id).then((res) => {
-    console.log("SSS");
-    console.log(res)
     if (res.success) {
       from_socket = res.data.socket_id;
     } else {
@@ -142,7 +173,6 @@ const match_emit = (from_user_id, to_user_id) => {
 
     return getSocketID(to_user_id);
   }).then((res) => {
-    console.log(res);
     if (res.success) {
       to_socket = res.data.socket_id;
     } else {
@@ -150,16 +180,14 @@ const match_emit = (from_user_id, to_user_id) => {
     }
 
     // emit
-    if (from_socket) {
-      console.log("FROM EEE");
+    if (from_socket && global_io.sockets.connected[from_socket]) {
       global_io.sockets.connected[from_socket].emit('match', {
         from: from_user_id,
         to: to_user_id
       });
     }
 
-    if (to_socket) {
-console.log("TO EEE");
+    if (to_socket && global_io.sockets.connected[to_socket]) {
       global_io.sockets.connected[to_socket].emit('match', {
         from: to_user_id,
         to: from_user_id
@@ -171,7 +199,37 @@ console.log("TO EEE");
   });
 };
 
+const chat_emit = (match_id, user_id, message) => {
+
+  let to_socket = null;
+
+  getMatch(match_id).then((res) => {
+    console.log("GET MATCH RES");
+    console.log(JSON.stringify(res));
+
+    let match = res.data;
+
+    let other_user_id = user_id == match.user_ids[0]
+      ? match.user_ids[1] : match.user_ids[0];
+
+    return getSocketID(other_user_id);
+  }).then((res) => {
+    if (res.success) {
+      to_socket = res.data.socket_id;
+      if (global_io.sockets.connected[to_socket]) {
+        global_io.sockets.connected[to_socket].emit('message', {
+          message: message,
+          match_id: match_id
+        });
+      }
+    }
+  }).catch((err) => {
+    
+  });
+};
+
 module.exports = {
   init: init,
-  match_emit: match_emit
+  match_emit: match_emit,
+  chat_emit: chat_emit
 };

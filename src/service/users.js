@@ -22,7 +22,7 @@ async function createUser(email) {
 
   // Query param
   const userObj = {
-    email: email
+    email: email,
   };
 
   try {
